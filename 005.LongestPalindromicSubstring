@@ -1,0 +1,91 @@
+class Solution:
+    def longestPalindrome(self, s):
+        """
+        :type s: str
+        :rtype: str
+        """
+        if len(s) < 2:
+            return s
+        self.res = ""
+        for i in range(len(s)):
+            self.Palindrome(s, i, i)
+            self.Palindrome(s, i, i+1)
+        return self.res
+        
+    def Palindrome(self, s, left, right):
+        while left >= 0 and right < len(s) and s[left] == s[right]:
+            left -= 1
+            right += 1
+        if (right - left -1) > len(self.res):
+            self.res = s[left+1:right]
+            
+class Solution1:
+    def longestPalindrome(self, s):
+        """
+        :type s: str
+        :rtype: str
+        :description ：这是一个错误的方案
+        :version 1 :对于aba这样的匹配，上次匹配上了， 这次没匹配上需要回来-2后再匹配一次
+        :version 2 :"aaabaaaa" 这个用例返回了"aaabaaaa"， 不能再往前时需要解除match，否则会进行继续匹配的, bug修改
+        :version 3 :"ababababa" 返回了"abababa"，正确答案为从第6个字符开始匹配，可以得到最大匹配，但从目前的算法从第5字符开始匹配，然后走到第一个还是可以匹配上。
+        :version 3 : 但这样就没有机会返回到第6个字符匹配了，也就是说需要有从每个字符开始尝试的机会，否则都有可能错过最大的匹配串，这样就返回到了Soution的方案了
+        :version 3 : 虽然这个问题在当前的方案下无解， 但我已经走到黄河了，可以死心了。
+        """
+        if len(s) < 2:
+            return s
+        self.res = ""
+        match = 0
+        right = 0
+        for right in range(len(s)):
+            if right == 0:
+                self.res = s[right:1]
+                continue
+            print("test:right %d" % right)
+            if match == 0: #if not matched, need give left a initial value
+                left = right - 1
+            match = self.Helper(s, left, right,match)
+            if match == 1 and left > 0:
+                left -= 1
+        print(self.res)
+        match = 0
+        right = 2
+        while right < len(s):
+            print("test:right %d" % right)
+            if match == 0: 
+                left = right - 2
+            match1 = self.Helper(s, left, right,match)
+            if match1 == 1 and left > 0:
+                left -= 1
+            elif match1 == 1 and left == 0:#不能再往前时需要解除match，否则会进行继续匹配的, bug修改
+                match1 = 0
+            if match1 == 0 and match == 1:#上次匹配上了， 这次没匹配上需要回来-2后再匹配一次
+                right -= 1
+            right += 1
+            match = match1
+        print(self.res)
+        return self.res
+    
+    def Helper(self, s, left, right, match):
+        if s[left] == s[right]:  #if s is ‘XXXaaXXX’ mode
+            print("test:matched ", left, right)
+            if len(self.res) < (right - left + 1):
+                self.res = s[left:right+1]
+            if left > 0:
+                match = 1
+        else:
+            print("test:not matched ", left, right)
+            if match == 1 and len(self.res) < (right - left -1):
+                self.res = s[left + 1:right]
+                print("test:matched end")
+            match = 0 
+        return match
+
+#s = "ccc"
+#print(Solution1().longestPalindrome(s))
+#s1 = "aaaa"
+#print(Solution1().longestPalindrome(s1))
+s2 = "abadd"
+s2 = "bananas"
+s2 = "aaabaaaa"
+s2 = "ababababa"
+print(Solution1().longestPalindrome(s2))
